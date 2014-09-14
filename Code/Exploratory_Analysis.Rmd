@@ -26,9 +26,36 @@ This assignment should be submitted through the module 2 collaborative assignmen
 blackboard by end of day (11:59 p.m. EDT) on Wednesday, September 27, 2014. Each group has 
 its own discussion board and file share available. 
 
+# Load Data
+
 ```{r data}
 # Start by loading the data
 
-
+setwd("Code")
+sales <- read.csv("../Data/sales.csv")
+details <- read.csv("../data/details.csv")
 ```
+
+# Clean Data
+
+
+# Explore Data
+
+First scatter 
+
+```{r}
+plot(sales$date, sales$demand.ham, main="Ham")
+plot(sales$date, sales$demand.turkey, main="Turkey")
+plot(sales$date, sales$demand.veggie, main="Veggie")
+
+plot(sales$date, sales$available.ham, main="Ham")
+plot(sales$date, sales$available.turkey, main="Turkey")
+plot(sales$date, sales$available.veggie, main="Veggie")
+```
+
+# Comments
+
+
+
+# TODO
 
