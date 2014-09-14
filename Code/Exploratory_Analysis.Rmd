@@ -1,0 +1,34 @@
+---
+title: "Untitled"
+author: "Partha Banerjee, Santiago Cetrangolo, Aaron Palumbo, Vincent Ying"
+date: "Sunday, September 14, 2014"
+output: html_document
+---
+
+James is a budding entrepreneur, and for the last two years he has been operating a sandwich stand 
+in the lobby of his office building during the lunch hour. He also knows that careful data analysis 
+can help him run his business more effectively. As a result, he has been tracking sandwich demand 
+over the two years and he has carefully recorded the number of each type of sandwich demanded, 
+the number he brought with him to sell, and his prices for each type of sandwich. 
+Your job is to use the data to determine how many sandwiches of each type he should bring each 
+day in order to maximize his expected profits. Two CSV files are available to support your analysis. 
+The daily sales data contains number brought and number demanded for each sandwich. (Note that 
+there may be days where demand exceeds supply, but James is clever and he records the requests 
+he is unable to fulfill.) The pricing data contains the cost and sale price of each type of sandwich. 
+Analyze the data and provide a recommendation to James. Be sure to identify any assumptions you 
+make and be sure to back up your recommendations with thorough analysis. You should, as a 
+group, submit a single report (expected to be 1-3 pages, but that is a guideline and not a rule) that 
+provides your analysis. You may also attach any relevant code, but that is not required and will not 
+be taken into account for grading purposes. 
+ 
+ 
+This assignment should be submitted through the module 2 collaborative assignment mechanism in 
+blackboard by end of day (11:59 p.m. EDT) on Wednesday, September 27, 2014. Each group has 
+its own discussion board and file share available. 
+
+```{r data}
+# Start by loading the data
+
+
+```
+
