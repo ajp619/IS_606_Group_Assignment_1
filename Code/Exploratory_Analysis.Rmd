@@ -31,12 +31,16 @@ its own discussion board and file share available.
 ```{r data}
 # Start by loading the data
 
-setwd("Code")
 sales <- read.csv("../Data/sales.csv")
 details <- read.csv("../data/details.csv")
 ```
 
 # Clean Data
+
+```{r}
+# Add variable for total demand
+sales$demand.total <- sales$demand.ham + sales$demand.turkey + sales$demand.veggie
+```
 
 
 # Explore Data
@@ -53,9 +57,30 @@ plot(sales$date, sales$available.turkey, main="Turkey")
 plot(sales$date, sales$available.veggie, main="Veggie")
 ```
 
+What does total demand look like?
+
+```{r}
+plot(sales$demand.total, ylim=c(0, 80))
+
+# Does this depend on the day of the week?
+m <- seq(from=1, to = 130, by = 5)
+plot(sales$demand.total[m], main="monday")
+plot(sales$demand.total[m+1], main="tuesday")
+plot(sales$demand.total[m+2], main="wednesday")
+plot(sales$demand.total[m+3], main="thursday")
+plot(sales$demand.total[m+4], main="friday")
+
+```
+
+What other ways can we subdivide this?
+
+* By sandwich by day
+* by sandwich by week
+
+
 # Comments
 
-
+Introduciton says 2 years but we only have data for 26 weeks. Why?
 
 # TODO
 
