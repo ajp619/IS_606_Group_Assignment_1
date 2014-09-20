@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Sandwich Sales Optimization"
 author: "Partha Banerjee, Santiago Cetrangolo, Aaron Palumbo, Vincent Ying"
 date: "Sunday, September 14, 2014"
 output: html_document
@@ -25,6 +25,20 @@ be taken into account for grading purposes.
 This assignment should be submitted through the module 2 collaborative assignment mechanism in 
 blackboard by end of day (11:59 p.m. EDT) on Wednesday, September 27, 2014. Each group has 
 its own discussion board and file share available. 
+
+```{r echo=FALSE}
+
+# Make sure we're in the right working directory:  "Code"
+
+if("Code" %in% list.files()){
+  setwd("Code")
+}
+
+if(!("Code" %in% list.files("..")))
+{
+  stop
+}
+```
 
 # Load Data
 
@@ -72,10 +86,49 @@ plot(sales$demand.total[m+4], main="friday")
 
 ```
 
-What other ways can we subdivide this?
+Let's look at some histograms
 
-* By sandwich by day
-* by sandwich by week
+```{r}
+hist(sales$demand.total[m], main="monday")
+hist(sales$demand.total[m+1], main="tuesday")
+hist(sales$demand.total[m+2], main="wednesday")
+hist(sales$demand.total[m+3], main="thursday")
+hist(sales$demand.total[m+4], main="friday")
+```
+
+That looks much better. Now let's look at sandwich by day of week
+
+```{r}
+#Ham
+
+hist(sales$demand.ham[m], main="monday")
+hist(sales$demand.ham[m+1], main="tuesday")
+hist(sales$demand.ham[m+2], main="wednesday")
+hist(sales$demand.ham[m+3], main="thursday")
+hist(sales$demand.ham[m+4], main="friday")
+```
+
+```{r}
+#Turkey
+
+hist(sales$demand.turkey[m], main="monday")
+hist(sales$demand.turkey[m+1], main="tuesday")
+hist(sales$demand.turkey[m+2], main="wednesday")
+hist(sales$demand.turkey[m+3], main="thursday")
+hist(sales$demand.turkey[m+4], main="friday")
+```
+
+```{r}
+# Veggie
+
+hist(sales$demand.veggie[m], main="monday")
+hist(sales$demand.veggie[m+1], main="tuesday")
+hist(sales$demand.veggie[m+2], main="wednesday")
+hist(sales$demand.veggie[m+3], main="thursday")
+hist(sales$demand.veggie[m+4], main="friday")
+```
+
+I think we can model demand as a poisson distribution where lambda will be a function of at least sandwich and weekday.
 
 
 # Comments
@@ -83,4 +136,6 @@ What other ways can we subdivide this?
 Introduciton says 2 years but we only have data for 26 weeks. Why?
 
 # TODO
+
+* Next I'd like to look to see if availability affects this.
 
