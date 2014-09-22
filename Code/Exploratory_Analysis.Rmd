@@ -54,6 +54,9 @@ details <- read.csv("../data/details.csv")
 ```{r}
 # Add variable for total demand
 sales$demand.total <- sales$demand.ham + sales$demand.turkey + sales$demand.veggie
+
+# Add variable for profit = price - cost
+details$profit <- details$price - details$cost
 ```
 
 
@@ -128,7 +131,54 @@ hist(sales$demand.veggie[m+3], main="thursday")
 hist(sales$demand.veggie[m+4], main="friday")
 ```
 
+```{r}
+What about just demand per sandwich
+hist(sales$demand.veggie)
+hist(sales$demand.turkey)
+hist(sales$demand.ham)
+```
+
 I think we can model demand as a poisson distribution where lambda will be a function of at least sandwich and weekday.
+
+# Ham
+
+Let's start looking at the Ham sandwich. I will begin by using a poisson distribution to model the demand for a Ham sandwich. The expected value = $\lambda$ = average Ham sandwich sold per day.
+
+```{r}
+lambda <- sum(sales$demand.ham) / nrow(sales)
+ndays <- nrow(sales)
+
+trials <- 10000
+n <- 10000 / ndays
+sim.sales <- rpois(trials, lambda)
+barplot(table(sim.sales) / n)
+hist(sales$demand.ham)
+
+```
+
+Now I need to model the profit:
+
+profit = demand * profit - leftover * cost
+inventory = 16
+
+What happens?
+
+```{r}
+days <- 1000
+stock <- 15
+i = 1
+results <- vector(mode="numeric")
+for(stock in 10:20){
+  demand <- rpois(days, lambda)
+  profit <- sum(demand >= stock) * details$profit[details$type == "ham"] * stock
+  loss <- sum((demand - 16)[demand - 16 < 0] * details$cost[details$type == "ham"])
+  results[i] <- profit + loss
+  i = i + 1
+}
+
+
+```
+
 
 
 # Comments
