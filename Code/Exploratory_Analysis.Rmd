@@ -132,7 +132,7 @@ hist(sales$demand.veggie[m+4], main="friday")
 ```
 
 ```{r}
-What about just demand per sandwich
+# What about just demand per sandwich
 hist(sales$demand.veggie)
 hist(sales$demand.turkey)
 hist(sales$demand.ham)
@@ -175,6 +175,8 @@ for(stock in 10:20){
   results[i] <- profit + loss
   i = i + 1
 }
+
+plot(10:20, results)
 
 
 ```
