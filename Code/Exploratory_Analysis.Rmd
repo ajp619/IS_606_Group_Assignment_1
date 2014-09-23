@@ -165,59 +165,78 @@ In this model I am proposing that a coupon that can be used on a return trip be 
 What happens?
 
 ```{r}
-days <- 5 * 52 * 5        # x days per week * y weeks per year * z years
+
+profit.sim <- function(lambda, days, num.stocked, cost.details, coupon=c(1, 0)){
+  demand <- rpois(days, lambda)
+  
+  number.sold <- demand
+  number.sold[number.sold > num.stocked] <- num.stocked
+  number.sold <- sum(number.sold)
+  
+  number.unsold <- sum((num.stocked - demand)[ num.stocked - demand > 0])
+  
+  number.unfilled <- sum((demand - num.stocked)[demand - num.stocked > 0])
+  
+  profit <- number.sold * cost.details$profit
+  inventory.loss <- number.unsold * cost.details$cost
+  # coupon.cost = # sandwiches * ($X off per sandwich OR % off per sandwich)
+  #                              (1 + 0 * price) = $1 off per sandwich
+  #                              (0 + 0.25 * price) = 25% off per sandwich
+  #                              (0 + 0 * price) = no coupon offered
+  coupon.cost <- number.unfilled * (coupon[1] + coupon[2] * cost.details$price)
+  
+  # Return yearly profit estimate, based on 52 * 5 = 260 days per year
+  days.per.year <- 52 * 5
+  
+  return((profit - inventory.loss - coupon.cost) / days * days.per.year)
+}
+```
+
+
+```{r}
+days <- 10000
 
 stock.range <- 10:30      # Check results for these stocking values
 
 sandwich <- "ham"
-sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
+for(sandwich in c("ham", "veggie", "turkey")){
+  sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
+  
+  # Filter Sandwich Sales
+  m <- seq(from=1, to = 130, by = 5)
+  # Monday = m, Tuesday = m + 1, Wednesday = m + 2, ... , Friday = m + 4
+  days.of.week <- c("monday", "tuesday", "wednesday", "thursday", "friday")
+  dow <- "monday"
+  n <- which(dow == days.of.week) - 1
+  sandwich.sales <- sandwich.sales[m+n]
+  
+  lambda <- mean(sandwich.sales)
 
-# Filter Sandwich Sales
-m <- seq(from=1, to = 130, by = 5)
-# Monday = m, Tuesday = m + 1, Wednesday = m + 2, ... , Friday = m + 4
-days.of.week <- c("monday", "tuesday", "wednesday", "thursday", "friday")
-dow <- "monday"
-n <- which(dow == days.of.week) - 1
-sandwich.sales <- sandwich.sales[m+n]
-
-lambda <- sum(sandwich.sales) / length(sandwich.sales)
-
-i = 1
-results <- vector(mode="numeric")
-for(stock in stock.range){
-  demand <- rpois(days, lambda)
+  i = 1
+  results <- vector(mode="numeric")
+  for(stock in stock.range){
+    results[i] <- profit.sim(lambda, days, stock, details[details$type == sandwich, ], c(0, 0.25))
+    i = i + 1
+  }
   
-  number.sold <- demand
-  number.sold[number.sold > stock] <- stock
-  number.sold <- sum(number.sold)
+  plot(stock.range, results, ylim=c(0, 15000), main=sandwich)
   
-  number.unsold <- sum((stock - demand)[ stock - demand > 0])
-  number.unfilled <- sum((demand - stock)[demand - stock > 0])
-  
-  sandwich.type <- details$type == sandwich
-  
-  profit <- number.sold * details$profit[sandwich.type]
-  inventory.loss <- number.unsold * details$cost[sandwich.type]
-  
-  # Coupon cost = % of price
-#   coupon.cost <- number.unfilled * 0.25 * details$price[sandwich.type]
-  # Coupon cost = absolute value (e.g. $1 off)
-  coupon.cost <- number.unfilled
-
-  results[i] <- profit - inventory.loss - coupon.cost
-  i = i + 1
+  print(c(stock.range[which(results == max(results))], max(results)))
 }
-
-plot(stock.range, results)
-
-stock.range[which(results == max(results))]
+  
 ```
 
-We see that, as we would expect, there is a big downside to overstocking. The danger here is that if you don't have enough sandwiches, you might loose customers in the long run. Might be interesting to offer a coupon to customers who try to order a sandwich that is out of stock.
+This is good. Through simulation we can see that `r stock.range[which(results == max(results))]`  is the right number of ham sandwiches to stock. 
+
+----------------------
+
+We also see that, as we would expect, there is a big downside to overstocking. The danger here is that if you don't have enough sandwiches, you might loose customers in the long run. Might be interesting to offer a coupon to customers who try to order a sandwich that is out of stock.
 
 If we offered a 25% off coupon, what would that look like?
 
 * should probably include an assumption that being out of sandwiches is bad for business.
+
+# Veggie
 
 ```{r}
 # Veggie demand per day of week
@@ -254,9 +273,11 @@ hist(thur_pos)
 hist(fri_pos)
 ```
 
----------------
 
-This is good. Through simulation we can see that `r stock.range[which(results == max(results))]`  is the right number of ham sandwiches to stock. What else can we do? Maybe we can approach this from a bit more analytical manner.
+
+# Analytic Model
+
+Maybe we can approach this from a bit more analytical manner.
 
 We know that $P(Y) = \sum_{x} f(x) P(X = x)$
 
