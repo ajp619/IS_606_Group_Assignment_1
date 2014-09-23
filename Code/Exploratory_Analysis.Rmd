@@ -159,29 +159,42 @@ hist(sales$demand.ham)
 Now I need to model the profit:
 
 profit = demand * profit - leftover * cost
-inventory = 16
+inventory
 
 What happens?
 
 ```{r}
 days <- 1000
-stock <- 15
+# stock <- 15
+stock.range <- 10:20
 i = 1
 results <- vector(mode="numeric")
-for(stock in 10:20){
+for(stock in stock.range){
   demand <- rpois(days, lambda)
   profit <- sum(demand >= stock) * details$profit[details$type == "ham"] * stock
-  loss <- sum((demand - 16)[demand - 16 < 0] * details$cost[details$type == "ham"])
-  results[i] <- profit + loss
+  loss <- sum((demand - stock)[demand - stock < 0] * details$cost[details$type == "ham"])
+  # Try different things here: 25% off 50% off $1 off
+  coupon.cost <- sum((demand - stock)[demand - stock > 0] * details$cost[details$type == "ham"] * .25)
+  results[i] <- profit + loss - coupon.cost
   i = i + 1
 }
 
-plot(10:20, results)
+plot(stock.range, results)
 
 
 ```
 
+We see that, as we would expect, there is a big downside to overstocking. The danger here is that if you don't have enough sandwiches, you might loose customers in the long run. Might be interesting to offer a coupon to customers who try to order a sandwich that is out of stock.
 
+If we offered a 25% off coupon, what would that look like?
+
+* should probably include an assumption that being out of sandwiches is bad for business.
+
+---------------
+
+This is good. Through simulation we can see that `r stock.range[which(results == max(results))]`  is the right number of ham sandwiches to stock. What else can we do? Maybe we can approach this from a bit more analytical manner.
+
+We know that $P(Y) = \sum_{x} f(x) P(X = x)$
 
 # Comments
 
