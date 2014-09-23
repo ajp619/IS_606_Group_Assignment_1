@@ -145,43 +145,72 @@ I think we can model demand as a poisson distribution where lambda will be a fun
 Let's start looking at the Ham sandwich. I will begin by using a poisson distribution to model the demand for a Ham sandwich. The expected value = $\lambda$ = average Ham sandwich sold per day.
 
 ```{r}
-lambda <- sum(sales$demand.ham) / nrow(sales)
+lambda <- sum(sales$demand.ham) / length(sales$demand.ham)
 ndays <- nrow(sales)
 
 trials <- 10000
-n <- 10000 / ndays
+comparison.factor <- trials / ndays
 sim.sales <- rpois(trials, lambda)
-barplot(table(sim.sales) / n)
+barplot(table(sim.sales) / comparison.factor)
 hist(sales$demand.ham)
 
 ```
 
 Now I need to model the profit:
 
-profit = demand * profit - leftover * cost
-inventory
+profit = number.sold * profit - number.unsold * cost - number.unfilled * coupon.cost
+
+In this model I am proposing that a coupon that can be used on a return trip be given to every customer whose order cannot be filled. This will help to keep customors returning even if their order goes unfilled.
 
 What happens?
 
 ```{r}
-days <- 1000
-# stock <- 15
-stock.range <- 10:20
+days <- 5 * 52 * 5        # x days per week * y weeks per year * z years
+
+stock.range <- 10:30      # Check results for these stocking values
+
+sandwich <- "ham"
+sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
+
+# Filter Sandwich Sales
+m <- seq(from=1, to = 130, by = 5)
+# Monday = m, Tuesday = m + 1, Wednesday = m + 2, ... , Friday = m + 4
+days.of.week <- c("monday", "tuesday", "wednesday", "thursday", "friday")
+dow <- "monday"
+n <- which(dow == days.of.week) - 1
+sandwich.sales <- sandwich.sales[m+n]
+
+lambda <- sum(sandwich.sales) / length(sandwich.sales)
+
 i = 1
 results <- vector(mode="numeric")
 for(stock in stock.range){
   demand <- rpois(days, lambda)
-  profit <- sum(demand >= stock) * details$profit[details$type == "ham"] * stock
-  loss <- sum((demand - stock)[demand - stock < 0] * details$cost[details$type == "ham"])
-  # Try different things here: 25% off 50% off $1 off
-  coupon.cost <- sum((demand - stock)[demand - stock > 0] * details$cost[details$type == "ham"] * .25)
-  results[i] <- profit + loss - coupon.cost
+  
+  number.sold <- demand
+  number.sold[number.sold > stock] <- stock
+  number.sold <- sum(number.sold)
+  
+  number.unsold <- sum((stock - demand)[ stock - demand > 0])
+  number.unfilled <- sum((demand - stock)[demand - stock > 0])
+  
+  sandwich.type <- details$type == sandwich
+  
+  profit <- number.sold * details$profit[sandwich.type]
+  inventory.loss <- number.unsold * details$cost[sandwich.type]
+  
+  # Coupon cost = % of price
+#   coupon.cost <- number.unfilled * 0.25 * details$price[sandwich.type]
+  # Coupon cost = absolute value (e.g. $1 off)
+  coupon.cost <- number.unfilled
+
+  results[i] <- profit - inventory.loss - coupon.cost
   i = i + 1
 }
 
 plot(stock.range, results)
 
-
+stock.range[which(results == max(results))]
 ```
 
 We see that, as we would expect, there is a big downside to overstocking. The danger here is that if you don't have enough sandwiches, you might loose customers in the long run. Might be interesting to offer a coupon to customers who try to order a sandwich that is out of stock.
