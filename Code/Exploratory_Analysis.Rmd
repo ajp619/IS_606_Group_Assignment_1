@@ -285,8 +285,13 @@ We know that $P(Y) = \sum_{x} f(x) P(X = x)$
 
 Introduciton says 2 years but we only have data for 26 weeks. Why?
 
+Recommendations: track customer retention with loyalty card
+
 # TODO
 
-* Next I'd like to look to see if availability affects this.
+* Think about other models
+* Apply model to actual data. How to compare?
+* Comparing differnt time intervals to real data and compare
+* Other recommendations
 
 
