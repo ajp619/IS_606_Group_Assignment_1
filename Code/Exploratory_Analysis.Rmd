@@ -27,6 +27,8 @@ blackboard by end of day (11:59 p.m. EDT) on Wednesday, September 27, 2014. Each
 its own discussion board and file share available. 
 
 ```{r echo=FALSE}
+install.packages("MCMCpack")
+library("MCMCpack")
 
 # Make sure we're in the right working directory:  "Code"
 
@@ -236,15 +238,17 @@ If we offered a 25% off coupon, what would that look like?
 
 * should probably include an assumption that being out of sandwiches is bad for business.
 
+
 # Veggie
+
+Poisson distributions for each day of the week.
 
 ```{r}
 # Veggie demand per day of week
-
 veg_week <- c(0,0,0,0,0)
 veg_lambda <- c(0,0,0,0,0)
 
-# Mean of sales per day of the week
+# Sales per day of the week
 mon_veg <- sales$demand.veggie[seq(1, length(sales$demand.veggie), 5)]
 tue_veg <- sales$demand.veggie[seq(2, length(sales$demand.veggie), 5)]
 wed_veg <- sales$demand.veggie[seq(3, length(sales$demand.veggie), 5)]
@@ -252,7 +256,7 @@ thur_veg <- sales$demand.veggie[seq(4, length(sales$demand.veggie), 5)]
 fri_veg <- sales$demand.veggie[seq(5, length(sales$demand.veggie), 5)]
 
 dow_sales <- list(mon_veg, tue_veg, wed_veg, thur_veg, fri_veg)
-  
+
 # Calculate lambda and prediction for each day of the week
 for (i in 1:5) {
   veg_lambda[i] <-  mean(dow_sales[[i]])
@@ -273,7 +277,17 @@ hist(thur_pos)
 hist(fri_pos)
 ```
 
+Bayesian models for veggie sandwiches for the whole time period.
 
+```{r}
+bayes_model <- MCMCpoisson(demand.veggie ~ date, data=sales,
+                           burnin=1000, mcm=10000, thin=1, tune=0.7,
+                           verbose=0, seed=NA, beta.start=NA,
+                           b0=0, B0=0, marginal.likelihood="none")
+
+summary(bayes_model)
+plot(bayes_model)
+```
 
 # Analytic Model
 
