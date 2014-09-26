@@ -1,0 +1,223 @@
+---
+title: "Sandwich Sales Optimization"
+author: "Partha Banerjee, Aaron Palumbo, Vincent Ying"
+date: "Thursday, September 25, 2014"
+output: html_document
+---
+
+---
+title: "Sandwich Sales Optimization"
+author: "Partha Banerjee, Santiago Cetrangolo, Aaron Palumbo, Vincent Ying"
+date: "Sunday, September 14, 2014"
+output: html_document
+---
+
+James is a budding entrepreneur, and for the last two years he has been operating a sandwich stand 
+in the lobby of his office building during the lunch hour. He also knows that careful data analysis 
+can help him run his business more effectively. As a result, he has been tracking sandwich demand 
+over the two years and he has carefully recorded the number of each type of sandwich demanded, 
+the number he brought with him to sell, and his prices for each type of sandwich. 
+Your job is to use the data to determine how many sandwiches of each type he should bring each 
+day in order to maximize his expected profits. Two CSV files are available to support your analysis. 
+The daily sales data contains number brought and number demanded for each sandwich. (Note that 
+there may be days where demand exceeds supply, but James is clever and he records the requests 
+he is unable to fulfill.) The pricing data contains the cost and sale price of each type of sandwich. 
+Analyze the data and provide a recommendation to James. Be sure to identify any assumptions you 
+make and be sure to back up your recommendations with thorough analysis. You should, as a 
+group, submit a single report (expected to be 1-3 pages, but that is a guideline and not a rule) that 
+provides your analysis. You may also attach any relevant code, but that is not required and will not 
+be taken into account for grading purposes. 
+ 
+ 
+This assignment should be submitted through the module 2 collaborative assignment mechanism in 
+blackboard by end of day (11:59 p.m. EDT) on Wednesday, September 27, 2014. Each group has 
+its own discussion board and file share available. 
+
+```{r echo=FALSE}
+
+# Make sure we're in the right working directory:  "Code"
+
+if("Code" %in% list.files()){
+  setwd("Code")
+}
+
+if(!("Code" %in% list.files("..")))
+{
+  stop
+}
+```
+
+# Load Data
+
+```{r data}
+# Start by loading the data
+
+sales <- read.csv("../Data/sales.csv")
+details <- read.csv("../Data/details.csv")
+```
+
+# Clean Data
+
+```{r}
+# Add variable for total demand
+sales$demand.total <- sales$demand.ham + sales$demand.turkey + sales$demand.veggie
+
+# Add variable for profit = price - cost
+details$profit <- details$price - details$cost
+```
+
+# Patterns in demand
+
+One basic question to ask is are there any long term trends in the data, such as a rising or falling demand. With a quick scatter plot of total demand, we conclude that such a pattern does not exist
+
+```{r}
+x <- 1:length(sales$demand.total); y <- sales$demand.total
+# x <- 1:100
+# y <- x
+plot(x, y)
+lm1 <- lm(y ~ x)
+abline(lm1, col="red")
+summary(lm1)
+```
+
+Looking at the summary statistics for slope, we condlude that there is no significant long term trend in the data. Therefore, for modeling purposes, we will assume demand does not change over time.
+
+The next step is to determine a model that fits the historical data. With that model, we will then be able to predict optimal stocking levels for the future. A poisson distribution seems like a good candidate to model the past behavior. Let's check how well the data fits.
+
+## plot total demand density vs poisson distribution and comapre
+```{r}
+
+sandwich.sales <- sales$demand.total
+
+y.actual <- table(sandwich.sales)
+y.actual <- y.actual / sum(y.actual)
+
+x <- as.numeric(names(y.actual))
+
+y.simulated <- dpois(x, mean(sandwich.sales))
+
+plot(x, y.actual)
+points(x, y.simulated, type="l")
+```
+
+This model does a reasonable job of fitting the data, but does not give us enough fidelity to predict appropriate stocking quantities for the individual sandwich types. Let's try the same thing, but this time, we will create models for each sandwich type.
+
+## plot of demand density vs poisson | sandwich type
+```{r}
+for(sandwich in c("ham", "veggie", "turkey")){
+  sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
+  
+  y.actual <- table(sandwich.sales)
+  y.actual <- y.actual / sum(y.actual)
+  
+  x <- as.numeric(names(y.actual))
+  
+  y.simulated <- dpois(x, mean(sandwich.sales))
+  
+  plot(x, y.actual, main=sandwich)
+  points(x, y.simulated, type="l")
+}
+```
+
+These models appears to fit the data better than the lumped approximation and also gives us enough information to predict appropriate stocking levels. Next we will see if there are even more granular patterns in the data. We will attempt to further break down demand | sandwich type by grouping by day of the week. We will show these plots for one type of sandwich, but the conclusions can be extended to all types.
+
+## plot demand density ( sandwich type | day of week) and poisson
+```{r}
+m <- seq(from=1, to = 130, by = 5)
+dow <- c("Mon", "Tues", "Wed", "Thurs", "Fri")
+for(d in 0:4){
+  sandwich.sales <- sales$demand.veggie[m + d]  #Monday
+  
+  y.actual <- table(sandwich.sales)
+  y.actual <- y.actual / sum(y.actual)
+  
+  x <- as.numeric(names(y.actual))
+  
+  y.simulated <- dpois(x, mean(sandwich.sales))
+  
+  plot(x, y.actual, main=dow[d + 1])
+  points(x, y.simulated, type="l")
+}
+```
+
+
+In this breakdown, we do not get good alignment between the data and the model we are proposing. Other models were also attempted, such as subdividing the time scale into different chronological groups, but none of these were found to have a discernable pattern. For that reason, we will decide to model demand as a poisson(sandwich demand | type).
+
+# Profit model
+
+In order to compare different stocking quantities, we will need to determine how to compute James' daily proffit. One assumption we will make in this is that sandwiches made but not sold can not be sold on subsequent days and must be discarded. Our daily profit then becomes:
+
+Daily profit = (sandwiches sold) * (profit per sandwich) - (sandwiches made - sandwiches sold) * (cost per sandwich)
+
+Using the model as described above would encourage James to bring no more sandwiches than he can sell. The downside of this conservative approach is that it could, in the long run, have the effect of reducing demand for his sandwiches, as people stop coming to his sandwich stand because they can not get the sandwich they want*. To counteract this, James could offer a coupon to customers who are not able to get the sandwich they want, thereby giving them incentive to return to his stand another day. 
+
+*One thing to note here is that this theory is not borne out in the data. We do not see demand going down as a result of quantity stocked. 
+
+This modified model would be:
+
+Daily profit = (sandwiches sold) * (profit per sandwich) - (sandwiches made - sandwiches sold) * (cost per sandwich) - (sandwich demand - sandwich sold) * (coupon cost)
+
+Using this model we can simulate long term profit of different stocking quantities and determine the optimum stocking quantity for each sandwich. To generate these numbers we will use many days worth of simulated data.
+
+## plots of profit vs stocked | sandwich type
+```{r}
+
+profit.sim <- function(lambda, days, num.stocked, cost.details, coupon=c(1, 0)){
+  demand <- rpois(days, lambda)
+  
+  number.sold <- demand
+  number.sold[number.sold > num.stocked] <- num.stocked
+  number.sold <- sum(number.sold)
+  
+  number.unsold <- sum((num.stocked - demand)[ num.stocked - demand > 0])
+  
+  number.unfilled <- sum((demand - num.stocked)[demand - num.stocked > 0])
+  
+  profit <- number.sold * cost.details$profit
+  inventory.loss <- number.unsold * cost.details$cost
+  # coupon.cost = # sandwiches * ($X off per sandwich OR % off per sandwich)
+  #                              (1 + 0 * price) = $1 off per sandwich
+  #                              (0 + 0.25 * price) = 25% off per sandwich
+  #                              (0 + 0 * price) = no coupon offered
+  coupon.cost <- number.unfilled * (coupon[1] + coupon[2] * cost.details$price)
+  
+  # Return yearly profit estimate, based on 52 * 5 = 260 days per year
+  days.per.year <- 52 * 5
+  
+  return((profit - inventory.loss - coupon.cost) / days * days.per.year)
+}
+```
+
+
+```{r}
+days <- 10000
+
+stock.range <- 10:30      # Check results for these stocking values
+
+for(sandwich in c("ham", "veggie", "turkey")){
+  sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
+
+  lambda <- mean(sandwich.sales)
+
+  i = 1
+  results <- vector(mode="numeric")
+  for(stock in stock.range){
+    results[i] <- profit.sim(lambda, days, stock, details[details$type == sandwich, ], c(0, 0.25))
+    i = i + 1
+  }
+  
+  plot(stock.range, results, ylim=c(0, 15000), main=sandwich)
+  
+  print(c(stock.range[which(results == max(results))], max(results)))
+}
+  
+```
+
+# Validation
+
+Finally, as a last check we will run our recommended numbers through the actual data to confirm that historically, this would have provided James with maximum profit. We can compare that to his actual profit for completeness.
+
+# Conclusion
+
+Based on the above analysis, it is our recommnedation that James stock ...
+
