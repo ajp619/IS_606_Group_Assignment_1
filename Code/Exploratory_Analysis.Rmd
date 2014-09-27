@@ -142,7 +142,75 @@ hist(sales$demand.ham)
 
 I think we can model demand as a poisson distribution where lambda will be a function of at least sandwich and weekday.
 
-# Ham
+# Fit Testing
+
+How can we tell if the data is really fitting a poisson distribution?
+
+```{r}
+
+sandwich.sales <- sales$demand.veggie
+
+(x <- table(sandwich.sales))
+(x <- x / sum(x))
+
+k <- as.numeric(names(x))
+
+(y <- dpois(k, mean(sandwich.sales)))
+
+plot(k, x)
+points(k, y, type="l")
+```
+
+
+Now what about the breakdown by days:
+
+```{r}
+dow <- c("Mon", "Tues", "Wed", "Thurs", "Fri")
+for(d in 0:4){
+  sandwich.sales <- sales$demand.veggie[m + d]  #Monday
+  
+  (x <- table(sandwich.sales))
+  (x <- x / sum(x))
+  
+  k <- as.numeric(names(x))
+  
+  (y <- dpois(k, mean(sandwich.sales)))
+  
+  plot(k, x, main=dow[d + 1])
+  points(k, y, type="l")
+}
+
+```
+
+
+What about breaking it down by time matching up to the different availabilities
+
+```{r}
+plot(sales$demand.veggie)
+points(sales$available.veggie, type="l", col="blue")
+```
+
+```{r}
+days.range <- list(c(1, 50), c(51, 100), c(101, 130))
+for(days in days.range){
+  sandwich.sales <- sales$demand.veggie[days[1]:days[2]]  #Monday
+  
+  (x <- table(sandwich.sales))
+  (x <- x / sum(x))
+  
+  k <- as.numeric(names(x))
+  
+  (y <- dpois(k, mean(sandwich.sales)))
+  
+  plot(k, x, main=days)
+  points(k, y, type="l")
+}
+
+```
+
+Based on the graphs above, I think it's best to model demand over the entire range instead of breaking it down.
+
+# Model
 
 Let's start looking at the Ham sandwich. I will begin by using a poisson distribution to model the demand for a Ham sandwich. The expected value = $\lambda$ = average Ham sandwich sold per day.
 
@@ -204,13 +272,13 @@ sandwich <- "ham"
 for(sandwich in c("ham", "veggie", "turkey")){
   sandwich.sales <- eval(parse(text = paste0("sales$demand.", sandwich)))
   
-  # Filter Sandwich Sales
-  m <- seq(from=1, to = 130, by = 5)
-  # Monday = m, Tuesday = m + 1, Wednesday = m + 2, ... , Friday = m + 4
-  days.of.week <- c("monday", "tuesday", "wednesday", "thursday", "friday")
-  dow <- "monday"
-  n <- which(dow == days.of.week) - 1
-  sandwich.sales <- sandwich.sales[m+n]
+#   # Filter Sandwich Sales
+#   m <- seq(from=1, to = 130, by = 5)
+#   # Monday = m, Tuesday = m + 1, Wednesday = m + 2, ... , Friday = m + 4
+#   days.of.week <- c("monday", "tuesday", "wednesday", "thursday", "friday")
+#   dow <- "monday"
+#   n <- which(dow == days.of.week) - 1
+#   sandwich.sales <- sandwich.sales[m+n]
   
   lambda <- mean(sandwich.sales)
 
@@ -228,7 +296,7 @@ for(sandwich in c("ham", "veggie", "turkey")){
   
 ```
 
-This is good. Through simulation we can see that `r stock.range[which(results == max(results))]`  is the right number of ham sandwiches to stock. 
+This is good. Through simulation we can see that `r stock.range[which(results == max(results))]`  is the right number of turkey sandwiches to stock. 
 
 ----------------------
 
