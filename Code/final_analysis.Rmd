@@ -70,7 +70,7 @@ details$profit <- details$price - details$cost
 
 # Patterns in demand
 
-One basic question to ask is are there any long term trends in the data, such as a rising or falling demand. With a quick scatter plot of total demand, we conclude that such a pattern does not exist
+One basic question to ask is are there any long term trends in the data, such as a rising or falling demand. With a quick scatter plot of total demand, we conclude that such a pattern does not exist.
 
 ```{r echo=FALSE, fig.height=3, fig.width=6}
 x <- 1:length(sales$demand.total); y <- sales$demand.total
@@ -85,9 +85,9 @@ print("95% Confidence Interval for the slope:")
 confint(lm1)[2,]
 ```
 
-Looking at the summary statistics for slope, we see that 0 in included in the 95% confidence interval for the slope and from that, we conclude that there is no significant long term trend in the data. Therefore, for modeling purposes, we will assume demand does not change over time.
+Looking at the summary statistics for slope, we see that 0 is included in the 95% confidence interval for the slope and from that, we conclude that there is no significant long term trend in the data. Therefore, for modeling purposes, we will assume demand does not change over time.
 
-The next step is to find a model that fits the historical data. With that model, we will then be able to predict optimal stocking levels for the future. A Poisson distribution seems like a good candidate to model the past behavior. Let's check how well the data fits. For each model we explore below we will plot the actual data points and overlay a proposed Poisson distribution.
+The next step is to find a model that fits the historical data. With that model, we will then be able to predict optimal stocking levels for the future. A Poisson distribution seems like a good candidate to model the past behavior. Let's check how well the data fits. For each model, we will plot the actual data points and overlay a proposed Poisson distribution below.
 
 ## Total demand
 ```{r echo=FALSE, fig.height=3, fig.width=4}
@@ -107,7 +107,7 @@ plot(x, y.actual, main="Frequency of Total Demand",
 points(x, y.simulated, type="l")
 ```
 
-This model does a reasonable job of fitting the data, but does not give us enough fidelity to predict appropriate stocking quantities for the individual sandwich types. Let's try the same thing, but this time, we will create models for each sandwich type.
+This model does a reasonable job of fitting the data, but does not give us enough fidelity to predict appropriate stocking quantities for the individual sandwich types. Let's try the same thing, but this time we will create models for each sandwich type.
 
 ## Demand per sandwich type
 ```{r echo=FALSE, fig.height=2, fig.width=8}
@@ -163,7 +163,7 @@ None of these models show good alignment between the data and the model.
 
 ## Demand broken down by the periods of differing supply
 
-We know that while James was recording demand, he also adjusted his stocking levels. The below plot shows demand over time, overlayed with the quantity he was stocking. You can see three distince stocking levels.
+We know that while James was recording demand, he also adjusted his stocking levels. The below plot shows demand over time, overlayed with the quantity he was stocking. You can see three distinct stocking levels.
 
 ```{r echo=FALSE, fig.height=3, fig.width=6}
 days.range <- list(c(1, 50), c(51, 100), c(101, 130))
@@ -207,21 +207,24 @@ par(mfrow=c(1,1))
 
 In this breakdown, we do not get good alignment between the data and the model we are proposing.
 
-In conclusion, we find that modeling Demand per sandwich type as a Poisson distribution is the best choice.
+In conclusion, we find that modeling demand per sandwich type over the entire time period as a Poisson distribution is the best choice.
 
 # Profit model
 
-In order to compare different stocking quantities, we will need to determine how to compute James' daily profit. One assumption we will make in this is that sandwiches made but not sold can not be sold on subsequent days and must be discarded. Our daily profit then becomes:
+In order to compare different stocking quantities, we will need to determine how to compute James' daily profit. One assumption we will make in this calculation is that sandwiches unsold can not be carried over subsequent days and must be discarded. Our daily profit then becomes:
 
-Daily profit = (sandwiches sold) * (profit per sandwich) - (sandwiches made - sandwiches sold) * (cost per sandwich)
+Daily profit = (sandwiches sold) * (profit per sandwich) 
+                - (sandwiches made - sandwiches sold) * (cost per sandwich)
 
-Using the model as described above would encourage James to bring no more sandwiches than he can sell. The downside of this conservative approach is that it could, in the long run, have the effect of reducing demand for his sandwiches, as people stop coming to his sandwich stand because they can not get the sandwich they want*. To counteract this, James could offer a coupon to customers who are not able to get the sandwich they want, thereby giving them incentive to return to his stand another day. 
+Using the model as described above would encourage James to bring no more sandwiches than he can sell. The downside of this conservative approach is that it could have the effect of reducing demand for his sandwiches in the long run, as people stop coming to his sandwich stand because they could not get the sandwich they want*. To counteract this downside, James could offer a coupon to customers who were not able to get the sandwich type desired, thereby giving them incentive to return to his stand another day. 
 
 >*One thing to note here is that this theory is not borne out in the data. We do not see demand going down as a result of quantity stocked. However, we are only seeing a six month snapshot and this particular feedback loop could be a longer term issue. Going forward, we would recommend James continue to track demand while trying different coupon schemes.
 
 This modified model is:
 
-Daily profit = (sandwiches sold) * (profit per sandwich) - (sandwiches made - sandwiches sold) * (cost per sandwich) - (sandwich demand - sandwich sold) * (coupon cost)
+Daily profit = (sandwiches sold) * (profit per sandwich) 
+                - (sandwiches made - sandwiches sold) * (cost per sandwich) 
+                - (sandwich demand - sandwich sold) * (coupon cost)
 
 Using this model we can simulate long term profit of different stocking quantities and determine the optimum stocking quantity for each sandwich. To generate these numbers we will use many days worth of simulated data.
 
@@ -303,7 +306,7 @@ This has been modeled with a $`r coupon.model[1]` off coupon being offered to cu
 
 # Validation
 
-Finally, as a last check we will run our recommended numbers through the actual data to confirm that historically, this would have provided James with maximum profit. We can compare that to his actual profit for completeness.
+Finally as a last check, we will run our recommended numbers through the actual given data to confirm our predictions would have provided James with maximum profit. We can compare that to his actual profit for completeness.
 
 ```{r echo=FALSE}
 
@@ -376,15 +379,15 @@ Based on the above analysis, it is our recommendation that James stock the follo
 
 This has been modeled with a $`r coupon.model[1]` off coupon being offered to customers when the demand exceeds the supply.
 
-It is interesting to note that our recommendations produces a lower profit for Ham than what James achieved on his own. This can be explained in two ways:
+It is interesting to note that our recommendations produce a lower profit for Ham than what James achieved on his own. This can be explained in two ways:
 
-First, by offering a coupon, our model includes a penalty for not meeting demand, which is intended to increase customer retention. If we look at our model without offering that coupon we have:
+First, by offering a coupon, our model includes a penalty for not meeting demand. This was intended to increase customer retention. If we look at our model without offering that coupon we have:
 
 ![No coupon](no_coupon.png)
 
-This "No Coupon" model, as expected, produces higher profits, and the profits exceed what James was able to achieve independently, but, as discussed above, risks loosing customers.
+As expected, this "No Coupon" model produces higher profits and the profits exceed what James was able to achieve independently. As discussed above however, he risks loosing customers.
 
-Second, our model is an estimate of actual demand, which can vary on a yearly basis. We would recommend James continue to collect data and periodically refine the model to produce more accurate estimates of and capture any long term changes in demand.
+Second, our model is an estimate of actual demand, which can vary on a yearly basis. We would recommend James continue to collect data and periodically refine the model to produce more accurate estimates of demand and take note of any long term changes.
 
-In addition, as discussed above, we would recommend James continue to track demand while trying different coupon schemes. In the future, an optimal coupon scheme can be determined.
+In addition, we would recommend James continue to track demand while trying different coupon schemes. In the future, an optimal coupon scheme can be determined with more recorded data.
 

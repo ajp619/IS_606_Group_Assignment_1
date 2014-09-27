@@ -345,16 +345,43 @@ hist(thur_pos)
 hist(fri_pos)
 ```
 
-Bayesian models for veggie sandwiches for the whole time period.
+Bayesian models for veggie sandwiches.
 
 ```{r}
+# Whole time period.
 bayes_model <- MCMCpoisson(demand.veggie ~ date, data=sales,
-                           burnin=1000, mcm=10000, thin=1, tune=0.7,
+                           burnin=1000, mcmc=10000, thin=1, tune=0.7,
                            verbose=0, seed=NA, beta.start=NA,
                            b0=0, B0=0, marginal.likelihood="none")
-
 summary(bayes_model)
-plot(bayes_model)
+
+# Taking into account the two change points.
+model1 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
+                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
+                            lambda.mu = NA, lambda.var = NA,
+                            burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
+                            seed = NA, beta.start = NA, P.start = NA,
+                            marginal.likelihood="none")
+model2 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
+                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
+                            lambda.mu = NA, lambda.var = NA,
+                            burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
+                            seed = NA, beta.start = NA, P.start = NA,
+                            marginal.likelihood="none")
+model3 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
+                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
+                            lambda.mu = NA, lambda.var = NA,
+                            burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
+                            seed = NA, beta.start = NA, P.start = NA,
+                            marginal.likelihood="none")
+
+print(BayesFactor(model1, model2, model3))
+plotState(model1)
+plotChangepoint(model1)
+plotState(model2)
+plotChangepoint(model2)
+plotState(model3)
+plotChangepoint(model3)
 ```
 
 # Analytic Model
