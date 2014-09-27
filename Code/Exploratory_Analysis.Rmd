@@ -357,29 +357,26 @@ summary(bayes_model)
 
 # Taking into account the two change points.
 model1 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
-                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
-                            lambda.mu = NA, lambda.var = NA,
+                            c0 = 2, d0 = 1,
                             burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
-                            seed = NA, beta.start = NA, P.start = NA,
-                            marginal.likelihood="none")
-model2 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
-                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
-                            lambda.mu = NA, lambda.var = NA,
+                            marginal.likelihood="Chib95")
+model2 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 2,
+                            c0 = 2, d0 = 1,
                             burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
-                            seed = NA, beta.start = NA, P.start = NA,
-                            marginal.likelihood="none")
-model3 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 1,
-                            b0 = 0, B0 = 1, a = NULL, b = NULL, c0 = NA, d0 = NA,
-                            lambda.mu = NA, lambda.var = NA,
+                            marginal.likelihood="Chib95")
+model3 <- MCMCpoissonChange(demand.veggie ~ date, data=sales, m = 3,
+                            c0 = 2, d0 = 1,
                             burnin = 1000, mcmc = 1000, thin = 1, verbose = 0,
-                            seed = NA, beta.start = NA, P.start = NA,
-                            marginal.likelihood="none")
+                            marginal.likelihood="Chib95")
 
 print(BayesFactor(model1, model2, model3))
+
 plotState(model1)
 plotChangepoint(model1)
+
 plotState(model2)
 plotChangepoint(model2)
+
 plotState(model3)
 plotChangepoint(model3)
 ```
