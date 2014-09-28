@@ -213,8 +213,9 @@ In conclusion, we find that modeling demand per sandwich type over the entire ti
 
 In order to compare different stocking quantities, we will need to determine how to compute James' daily profit. One assumption we will make in this calculation is that sandwiches unsold can not be carried over subsequent days and must be discarded. Our daily profit then becomes:
 
-Daily profit = (sandwiches sold) * (profit per sandwich) 
-                - (sandwiches made - sandwiches sold) * (cost per sandwich)
+Daily profit = (sandwiches sold) * (profit per sandwich)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+- (sandwiches made - sandwiches sold) * (cost per sandwich)
 
 Using the model as described above would encourage James to bring no more sandwiches than he can sell. The downside of this conservative approach is that it could have the effect of reducing demand for his sandwiches in the long run, as people stop coming to his sandwich stand because they could not get the sandwich they want*. To counteract this downside, James could offer a coupon to customers who were not able to get the sandwich type desired, thereby giving them incentive to return to his stand another day. 
 
@@ -222,9 +223,11 @@ Using the model as described above would encourage James to bring no more sandwi
 
 This modified model is:
 
-Daily profit = (sandwiches sold) * (profit per sandwich) 
-                - (sandwiches made - sandwiches sold) * (cost per sandwich) 
-                - (sandwich demand - sandwich sold) * (coupon cost)
+Daily profit = (sandwiches sold) * (profit per sandwich)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                - (sandwiches made - sandwiches sold) * (cost per sandwich)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                - (sandwich demand - sandwich sold) * (coupon cost) 
 
 Using this model we can simulate long term profit of different stocking quantities and determine the optimum stocking quantity for each sandwich. To generate these numbers we will use many days worth of simulated data.
 
